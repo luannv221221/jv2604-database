@@ -230,5 +230,20 @@ DELETE FROM trig.products WHERE product_id = 3;
 SELECT * FROM trig.products;
 SELECT * FROM trig.categories;
 
+CREATE TABLE trig.product_history(
+	product_id INT,
+	old_price decimal,
+	new_price decimal,
+	changed_at TIME,
+);
 
+CREATE OR REPLACE FUNCTION log_product()
+RETURN TRIGGER AS $$
+BEGIN
+	IF NEW.price != OLD.price THEN
+	INSERT INTO product_history(product_id,old_price,new_price,changed_at) VALUE(OLD.product_id,OLD.price,NEW.price,NOW());
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
